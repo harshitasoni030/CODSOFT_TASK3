@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Churn Prediction</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="hero">
+    <h1>Customer Churn Prediction</h1>
+    <p>Enter customer details to estimate the chance they will leave.</p>
+    <span class="badge">Model: {{ best_model }} &middot; ROC-AUC {{ '%.3f' % metrics.roc_auc }}</span>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Customer Details</h2>
+      <form id="predict-form">
+        <div class="grid">
+          {% for f in features %}
+          <div class="field">
+            <label for="{{ f.name }}">{{ f.name }}</label>
+            {% if f.type == 'category' %}
+              <select id="{{ f.name }}" name="{{ f.name }}" required>
+                {% for opt in f.options %}<option value="{{ opt }}">{{ opt }}</option>{% endfor %}
+              </select>
+            {% elif f.type == 'binary' %}
+              <select id="{{ f.name }}" name="{{ f.name }}" required>
+                <option value="1">Yes</option>
+                <option value="0">No</option>
+              </select>
+            {% else %}
+              <input type="number" id="{{ f.name }}" name="{{ f.name }}" required
+                     min="{{ f.min }}" max="{{ f.max }}"
+                     step="{{ 1 if f.integer else 'any' }}"
+                     value="{{ f.default|int if f.integer else f.default }}">
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        <button type="submit" id="predict-btn">Predict</button>
+      </form>
+    </section>
+
+    <section class="card result" id="result" hidden>
+      <h2>Result</h2>
+      <div id="result-label" class="result-label"></div>
+      <p>Churn probability: <strong id="result-prob"></strong></p>
+      <div class="bar"><div id="bar-fill" class="bar-fill"></div></div>
+    </section>
+    <p id="error" class="error" hidden></p>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
